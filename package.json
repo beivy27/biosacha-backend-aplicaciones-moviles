@@ -1,0 +1,32 @@
+{
+  "name": "biosacha-backend",
+  "version": "1.0.0",
+  "description": "Backend académico del proyecto móvil BioSacha con JWT, caché cache-aside, corrección N+1 y worker asíncrono.",
+  "main": "index-semana8-final.js",
+  "scripts": {
+    "start": "node index-semana8-final.js",
+    "dev": "node --watch index-semana8-final.js",
+    "check": "node --check index.js && node --check index-semana8.js && node --check index-semana8-final.js",
+    "test": "npm run check"
+  },
+  "keywords": [
+    "biosacha",
+    "nodejs",
+    "express",
+    "jwt",
+    "cache-aside",
+    "eager-loading",
+    "worker"
+  ],
+  "author": "Beivy Amarilis Rivera Vergara",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "uuid": "^14.0.1"
+  }
+}
