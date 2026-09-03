@@ -23,3 +23,15 @@ temp/
 # Editores
 .vscode/
 .idea/
+
+/generated/prisma
+
+# Semana 12 - archivos locales
+.env
+.env.save
+*.backup*
+*.antes-*
+.agents/
+.claude/
+.windsurf/
+skills-lock.json

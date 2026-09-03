@@ -1,0 +1,138 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum RolUsuario {
+  comunitario
+  tecnico
+  validador
+  admin
+}
+
+enum EstadoTaxonomico {
+  pendiente
+  validada
+  rechazada
+}
+
+enum EstadoSync {
+  pendiente
+  enviado
+  sincronizado
+  error
+}
+
+enum EstadoValidacion {
+  borrador
+  pendiente
+  aprobado
+  rechazado
+}
+
+enum EstadoLote {
+  en_cola
+  procesando
+  completado
+  error
+}
+
+model Usuario {
+  id_usuario     Int        @id @default(autoincrement())
+  nombre         String     @db.VarChar(120)
+  correo         String     @unique @db.VarChar(180)
+  password_hash  String     @db.VarChar(255)
+  rol            RolUsuario @default(comunitario)
+  activo         Boolean    @default(true)
+  creado_en      DateTime   @default(now())
+  actualizado_en DateTime   @updatedAt
+
+  registros RegistroBotanico[]
+  lotes     LoteSincronizacion[]
+
+  @@map("usuarios")
+}
+
+model Planta {
+  id_planta              Int              @id @default(autoincrement())
+  nombre_cientifico      String           @unique @db.VarChar(180)
+  nombre_local_principal String           @db.VarChar(120)
+  estado_taxonomico      EstadoTaxonomico @default(pendiente)
+  creado_en              DateTime         @default(now())
+  actualizado_en         DateTime         @updatedAt
+
+  registros RegistroBotanico[]
+
+  @@map("plantas")
+}
+
+model Comunidad {
+  id_comunidad        Int      @id @default(autoincrement())
+  nombre              String   @db.VarChar(160)
+  provincia           String   @db.VarChar(80)
+  idioma_predominante String   @db.VarChar(80)
+  creado_en           DateTime @default(now())
+  actualizado_en      DateTime @updatedAt
+
+  registros RegistroBotanico[]
+
+  @@map("comunidades")
+}
+
+model RegistroBotanico {
+  id_registro Int    @id @default(autoincrement())
+  local_uuid  String @unique @db.VarChar(100)
+
+  id_planta    Int
+  id_usuario   Int
+  id_comunidad Int
+
+  fecha_registro  DateTime
+  latitud         Float
+  longitud        Float
+  altitud_m       Int?
+  precision_gps_m Float?
+  habitat         String   @db.VarChar(500)
+
+  estado_sync       EstadoSync       @default(pendiente)
+  estado_validacion EstadoValidacion @default(borrador)
+  eliminado         Boolean          @default(false)
+
+  creado_en      DateTime @default(now())
+  actualizado_en DateTime @updatedAt
+
+  planta    Planta    @relation(fields: [id_planta], references: [id_planta])
+  usuario   Usuario   @relation(fields: [id_usuario], references: [id_usuario])
+  comunidad Comunidad @relation(fields: [id_comunidad], references: [id_comunidad])
+
+  @@index([id_planta])
+  @@index([id_usuario])
+  @@index([id_comunidad])
+  @@index([estado_validacion])
+  @@map("registros_botanicos")
+}
+
+model LoteSincronizacion {
+  id_lote              String     @id @default(uuid()) @db.Uuid
+  id_usuario           Int?
+  estado               EstadoLote @default(en_cola)
+  total_registros      Int        @default(0)
+  registros_procesados Int        @default(0)
+  payload              Json?
+  error                String?
+
+  fecha_creacion       DateTime  @default(now())
+  fecha_inicio_proceso DateTime?
+  fecha_fin            DateTime?
+
+  usuario Usuario? @relation(fields: [id_usuario], references: [id_usuario], onDelete: SetNull)
+
+  @@index([id_usuario])
+  @@index([estado])
+  @@map("lotes_sincronizacion")
+}
